@@ -8,10 +8,55 @@ titleJson2HtmlTable('[{"image": "http://i.legendas.tv/poster/214x317/60/4f/tt412
 
 function searchSubtitle() {
     console.log(searchInput.value);
+    var resp = httpGet("http://127.0.0.1:8080/titles/" + searchInput.value);
+    titleJson2HtmlTable(resp);
 }
 
 function getTitleSubs(titleId) {
     console.log(titleId);
+    var resp = httpGet("http://127.0.0.1:8080/subtitles/" + titleId);
+    subtitlesJson2HtmlTable(resp);
+}
+
+function subtitlesJson2HtmlTable(json) {
+    var subsTable = ` 
+        <table class="paleBlueRows">
+            <thead>
+                <tr>
+                    <th>Number</th>
+                    <th>Class</th>
+                    <th>Subtitle</th>
+                    <th>Id</th>
+                </tr>
+            </thead>
+            <tbody>
+    `;
+
+    var subs = JSON.parse(json);
+    for (var i = 0; i < subs.length; i++) {
+        var row = `
+            <tr>
+                <td>${subs[i].number}</td>
+                <td>${subs[i].class}</td>
+                <td>
+                    <div>
+                        <p>${subs[i].name}</p>
+                        <p>${subs[i].data}</p>
+                    </div>
+                </td>
+                <td>${subs[i].id}</td>
+            </tr>
+        `;
+        subsTable = subsTable + row;
+    }
+
+    var endTable = `
+            </tbody>
+        </table>
+    `;
+
+    var t = document.getElementById("subs");
+    t.innerHTML = subsTable + endTable;
 }
 
 function titleJson2HtmlTable(titlesJson) {
@@ -48,4 +93,11 @@ function titleJson2HtmlTable(titlesJson) {
 
     var t = document.getElementById("subs");
     t.innerHTML = titleTable + endTable;
+}
+
+function httpGet(theUrl) {
+    var xmlHttp = new XMLHttpRequest();
+    xmlHttp.open( "GET", theUrl, false );
+    xmlHttp.send( null );
+    return xmlHttp.responseText;
 }
