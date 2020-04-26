@@ -8,13 +8,14 @@ titleJson2HtmlTable('[{"image": "http://i.legendas.tv/poster/214x317/60/4f/tt412
 
 function searchSubtitle() {
     console.log(searchInput.value);
-    var resp = httpGet("http://127.0.0.1:8080/titles/" + searchInput.value);
+    console.log("pualo")
+    var resp = httpGet("http://" + window.location.hostname + ":5000/titles/" + searchInput.value);
     titleJson2HtmlTable(resp);
 }
 
 function getTitleSubs(titleId) {
     console.log(titleId);
-    var resp = httpGet("http://127.0.0.1:8080/subtitles/" + titleId);
+    var resp = httpGet("http://" + window.location.hostname + ":5000/subtitles/" + titleId);
     subtitlesJson2HtmlTable(resp);
 }
 
