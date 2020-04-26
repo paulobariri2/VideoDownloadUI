@@ -8,7 +8,6 @@ titleJson2HtmlTable('[{"image": "http://i.legendas.tv/poster/214x317/60/4f/tt412
 
 function searchSubtitle() {
     console.log(searchInput.value);
-    console.log("pualo")
     var resp = httpGet("http://" + window.location.hostname + ":5000/titles/" + searchInput.value);
     titleJson2HtmlTable(resp);
 }
@@ -17,6 +16,18 @@ function getTitleSubs(titleId) {
     console.log(titleId);
     var resp = httpGet("http://" + window.location.hostname + ":5000/subtitles/" + titleId);
     subtitlesJson2HtmlTable(resp);
+}
+
+function downloadSubtitle(subId, fileName) {
+    console.log(subId);
+    console.log(fileName);
+    var argsJson = {"subtitleId":subId,"outputName":fileName};
+    var resp = httpPost("http://" + window.location.hostname + ":5000/download", argsJson);
+    zipJson2HtmlTable(resp);
+}
+
+function downloadTorrent(release) {
+    console.log(release);
 }
 
 function subtitlesJson2HtmlTable(json) {
@@ -36,7 +47,7 @@ function subtitlesJson2HtmlTable(json) {
     var subs = JSON.parse(json);
     for (var i = 0; i < subs.length; i++) {
         var row = `
-            <tr>
+            <tr onclick='downloadSubtitle("${subs[i].id}", "${subs[i].name}")'>
                 <td>${subs[i].number}</td>
                 <td>${subs[i].class}</td>
                 <td>
@@ -96,9 +107,49 @@ function titleJson2HtmlTable(titlesJson) {
     t.innerHTML = titleTable + endTable;
 }
 
+function zipJson2HtmlTable(zipJson) {
+    var zipTable = `
+        <table class="paleBlueRows">
+            <thead>
+                <tr>
+                    <th>Releases</th>
+                </tr>
+            </thead>
+            <tbody>
+    `;
+
+    var endTable = `
+            </tbody>
+        </table>
+    `;
+    
+    var zip = JSON.parse(zipJson);
+    for (var i = 0; i < zip.subtitles.length; i++) {
+        var release = zip.subtitles[i].split("/");
+        release = release[release.length - 1];
+        var row = `
+            <tr onclick='downloadTorrent("${release}")'>
+                <td>${release}</td>
+            </tr>
+        `;
+        zipTable = zipTable + row;
+    }
+
+    var t = document.getElementById("subs");
+    t.innerHTML = zipTable + endTable;
+}
+
 function httpGet(theUrl) {
     var xmlHttp = new XMLHttpRequest();
     xmlHttp.open( "GET", theUrl, false );
     xmlHttp.send( null );
+    return xmlHttp.responseText;
+}
+
+function httpPost(theUrl, argsJson) {
+    var xmlHttp = new XMLHttpRequest();
+    xmlHttp.open( "POST", theUrl, false );
+    xmlHttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+    xmlHttp.send(JSON.stringify(argsJson));
     return xmlHttp.responseText;
 }
